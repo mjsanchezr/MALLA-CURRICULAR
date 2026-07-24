@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Curricular - Ingeniería Informática UCAB (2026)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --highlight-pre: #ef4444; /* Red for prerequisites */
+            --highlight-post: #3b82f6; /* Blue for post-requisites */
+            --highlight-active: #10b981; /* Green for hovered subject */
+            
+            /* Area colors */
+            --color-programacion: rgba(16, 185, 129, 0.2);
+            --border-programacion: rgba(16, 185, 129, 0.5);
+            
+            --color-matematicas: rgba(59, 130, 246, 0.2);
+            --border-matematicas: rgba(59, 130, 246, 0.5);
+            
+            --color-ciencias: rgba(139, 92, 246, 0.2);
+            --border-ciencias: rgba(139, 92, 246, 0.5);
+            
+            --color-gestion: rgba(245, 158, 11, 0.2);
+            --border-gestion: rgba(245, 158, 11, 0.5);
+            
+            --color-general: rgba(236, 72, 153, 0.2);
+            --border-general: rgba(236, 72, 153, 0.5);
+            
+            --color-electiva: rgba(100, 116, 139, 0.2);
+            --border-electiva: rgba(100, 116, 139, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            overflow-x: auto;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(15, 23, 42, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, rgba(30, 58, 138, 0.2) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, rgba(15, 23, 42, 1) 0, transparent 50%);
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            font-weight: 800;
+            background: -webkit-linear-gradient(45deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .malla-container {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 20px;
+            margin-bottom: 50px;
+            width: 100%;
+        }
+
+        @media (max-width: 1280px) {
+            .malla-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .malla-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .legend {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .malla-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .semester-col {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .semester-header {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .subject-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 100px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        .subject-code {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .subject-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: auto;
+            color: #f1f5f9;
+        }
+
+        .subject-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .subject-uc {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .req-indicator {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        /* Area styles */
+        .area-programacion { background: var(--color-programacion); border-left: 4px solid var(--border-programacion); }
+        .area-matematicas { background: var(--color-matematicas); border-left: 4px solid var(--border-matematicas); }
+        .area-ciencias { background: var(--color-ciencias); border-left: 4px solid var(--border-ciencias); }
+        .area-gestion { background: var(--color-gestion); border-left: 4px solid var(--border-gestion); }
+        .area-general { background: var(--color-general); border-left: 4px solid var(--border-general); }
+        .area-electiva { background: var(--color-electiva); border-left: 4px solid var(--border-electiva); }
+
+        /* Interaction States */
+        body.interacting .subject-card {
+            opacity: 0.3;
+            filter: grayscale(80%);
+        }
+
+        body.interacting .subject-card.is-active {
+            opacity: 1;
+            filter: grayscale(0%);
+            border-color: var(--highlight-active);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            transform: scale(1.05);
+        }
+
+        body.interacting .subject-card.is-pre {
+            opacity: 1;
+            filter: grayscale(0%);
+            border-color: var(--highlight-pre);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+        }
+
+        body.interacting .subject-card.is-post {
+            opacity: 1;
+            filter: grayscale(0%);
+            border-color: var(--highlight-post);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .uc-tracker {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 100;
+        }
+        
+        .uc-tracker h3 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: #3b82f6;
+        }
+        
+        .uc-tracker p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .subject-tooltip {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 250px;
+            z-index: 1000;
+            display: none;
+            pointer-events: none;
+            color: #f1f5f9;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tooltip-title { font-weight: 700; color: #3b82f6; margin-bottom: 8px; font-size: 0.95rem; }
+        .tooltip-row { margin-bottom: 5px; font-size: 0.85rem; }
+        .tooltip-label { color: #94a3b8; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <h1>Malla Curricular - Ingeniería Informática</h1>
+    <h2>UCAB - Pensum 2026-2027</h2>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background: var(--border-programacion);"></div> Programación / Informática</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--border-matematicas);"></div> Matemáticas</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--border-ciencias);"></div> Ciencias / Ingeniería</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--border-gestion);"></div> Gestión / Negocios</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--border-general);"></div> Formación General</div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--border-electiva);"></div> Electivas</div>
+        <div class="legend-item" style="margin-left: 20px; border-color: var(--highlight-pre);"><div class="legend-color" style="background: var(--highlight-pre);"></div> Prerrequisito</div>
+        <div class="legend-item" style="border-color: var(--highlight-post);"><div class="legend-color" style="background: var(--highlight-post);"></div> Postrequisito</div>
+    </div>
+
+    <div class="malla-container" id="malla">
+        <!-- Renderizado por JS -->
+    </div>
+    
+    <div class="uc-tracker" id="ucTracker">
+        <h3 id="ucTitle">Materias Desbloqueadas</h3>
+        <p id="ucReqs"></p>
+    </div>
+    
+    <div class="subject-tooltip" id="subjectTooltip"></div>
+
+    <script>
+        const mallaData = [
+  [
+    {
+      "codigo": "FING 02002",
+      "nombre": "Álgebra y Trigonometría",
+      "uc": "5",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingreso",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "UCAB 00009",
+      "nombre": "Competencia Textual en Español",
+      "uc": "5",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingreso",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02032",
+      "nombre": "Estrategia y Proyección Profesional",
+      "uc": "5",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingreso",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "UCAB 00001",
+      "nombre": "Identidad, Liderazgo y Compromiso I",
+      "uc": "3",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingreso",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02030",
+      "nombre": "Inglés",
+      "uc": "3",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingreso",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02009",
+      "nombre": "Lógica",
+      "uc": "4",
+      "area": "electiva",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingreso",
+          "correquisito": false
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "FING 02101",
+      "nombre": "Algebra Lineal",
+      "uc": "5",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Álgebra y Trigonometría",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02101",
+      "nombre": "Algoritmos y Programación",
+      "uc": "7",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Lógica",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02003",
+      "nombre": "Calculo Diferencial",
+      "uc": "6",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Álgebra y Trigonometría",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "UCAB 00002",
+      "nombre": "Identidad, Liderazgo y Compromiso II",
+      "uc": "3",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Identidad, Liderazgo y Compromiso I",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02026",
+      "nombre": "Ingles Técnico",
+      "uc": "4",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Inglés",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02000",
+      "nombre": "Matemáticas Discretas",
+      "uc": "6",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Lógica",
+          "correquisito": false
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "INFO 02002",
+      "nombre": "Algoritmos y Estructuras de Datos",
+      "uc": "7",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Algoritmos y Programación",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02004",
+      "nombre": "Cálculo Integral",
+      "uc": "5",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Cálculo Diferencial",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FACE 00024",
+      "nombre": "Contabilidad Financiera",
+      "uc": "5",
+      "area": "gestion",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 40
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02115",
+      "nombre": "Mecánica",
+      "uc": "6",
+      "area": "ciencias",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Cálculo Diferencial",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02005",
+      "nombre": "Organización del Computador",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Matemáticas Discretas",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02004",
+      "nombre": "Sistemas de Información",
+      "uc": "4",
+      "area": "electiva",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Estrategia y Proyección Profesional",
+          "correquisito": false
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "FING 02107",
+      "nombre": "Cálculo Vectorial",
+      "uc": "6",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Cálculo Integral",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Algebra Lineal",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "UCAB 00003",
+      "nombre": "Ecología, Ambiente y Sustentabilidad",
+      "uc": "3",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 72
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02007",
+      "nombre": "Ingeniería de Software",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Sistemas de Información",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Programación Orientada a Objetos",
+          "correquisito": true
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02016",
+      "nombre": "Ingeniería Económica",
+      "uc": "4",
+      "area": "gestion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Contabilidad Financiera",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02011",
+      "nombre": "Probabilidad y Estadística",
+      "uc": "5",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Cálculo Integral",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02003",
+      "nombre": "Programación Orientada a Objetos",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Algoritmos y Estructuras de Datos",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02010",
+      "nombre": "Sistemas Operativos",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Organización del Computador",
+          "correquisito": false
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "INFO 02104",
+      "nombre": "Diseño de Experiencia de Usuario",
+      "uc": "4",
+      "area": "electiva",
+      "prelaciones": []
+    },
+    {
+      "codigo": "FING 02006",
+      "nombre": "Ecuaciones Diferenciales Ordinarias",
+      "uc": "4",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Cálculo Integral",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02107",
+      "nombre": "Electricidad y Magnetismo",
+      "uc": "6",
+      "area": "ciencias",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Mecánica",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02013",
+      "nombre": "Gestión de Proyectos de Software",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingeniería Económica",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Ingeniería de Software",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02016",
+      "nombre": "Redes de Comunicación de Datos",
+      "uc": "6",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Sistemas Operativos",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02012",
+      "nombre": "Sistemas de Bases de Datos",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 105
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02011",
+      "nombre": "Tópicos Especiales de Programación",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Programación Orientada a Objetos",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "SC-5",
+      "nombre": "Curso de Servicio Comunitario",
+      "uc": "0",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 105
+        }
+      ]
+    },
+    {
+      "codigo": "SC-5",
+      "nombre": "Servicio Comunitario",
+      "uc": "0",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Curso de Servicio Comunitario",
+          "correquisito": false
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "INFO 02015",
+      "nombre": "Arquitectura del Computador Aplicada",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Electricidad y Magnetismo",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02019",
+      "nombre": "Aseguramiento de la Calidad del Software",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Gestión de Proyectos de Software",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02102",
+      "nombre": "Ciberseguridad Ofensiva",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Redes de Comunicación de Datos",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02018",
+      "nombre": "Ingeniería de Requisitos",
+      "uc": "4",
+      "area": "electiva",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Sistemas de Bases de Datos",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Gestión de Proyectos de Software",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "UCAB 00008",
+      "nombre": "Innovación y Emprendimiento",
+      "uc": "3",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 138
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02024",
+      "nombre": "Inteligencia de Negocios",
+      "uc": "3",
+      "area": "gestion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Tópicos Especiales para la Gestión de Datos",
+          "correquisito": true
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02010",
+      "nombre": "Métodos Numéricos",
+      "uc": "2",
+      "area": "matematicas",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Cálculo Vectorial",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02017",
+      "nombre": "Tópicos Especiales para la Gestión de Datos",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Sistemas de Bases de Datos",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO IILCT",
+      "nombre": "Curso de Trabajo de Grado",
+      "uc": "",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 151
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "INFO 02103",
+      "nombre": "Ciberseguridad Defensiva",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ciberseguridad Ofensiva",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02028",
+      "nombre": "Computación en la Nube",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ciberseguridad Defensiva",
+          "correquisito": true
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02025",
+      "nombre": "Desarrollo de Software",
+      "uc": "5",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Aseguramiento de la Calidad del Software",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Ingeniería de Requisitos",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Tópicos Especiales de Programación",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02020",
+      "nombre": "Inteligencia Artificial: Aprendizaje Automático",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 167
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02022",
+      "nombre": "Investigación de Operaciones",
+      "uc": "5",
+      "area": "gestion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Métodos Numéricos",
+          "correquisito": false
+        },
+        {
+          "tipo": "materia",
+          "valor": "Probabilidad y Estadísticas",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "FING RANGO",
+      "nombre": "Electiva (Informática)",
+      "uc": "3",
+      "area": "electiva",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 172
+        }
+      ]
+    },
+    {
+      "codigo": "FING RANGO",
+      "nombre": "Electiva Complementaria",
+      "uc": "3",
+      "area": "electiva",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 138
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 00192",
+      "nombre": "Pasantía",
+      "uc": "4",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Ingeniería de Requisitos",
+          "correquisito": false
+        }
+      ]
+    }
+  ],
+  [
+    {
+      "codigo": "INFO 02029",
+      "nombre": "Arquitecturas Empresariales",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 207
+        }
+      ]
+    },
+    {
+      "codigo": "FING 02014",
+      "nombre": "Ética Profesional",
+      "uc": "3",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "UC",
+          "valor": 207
+        }
+      ]
+    },
+    {
+      "codigo": "INFO 02027",
+      "nombre": "Evaluación de Sistemas Informáticos",
+      "uc": "4",
+      "area": "programacion",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Investigación de Operaciones",
+          "correquisito": false
+        }
+      ]
+    },
+    {
+      "codigo": "INFO IILTG",
+      "nombre": "Trabajo de Grado (TG)",
+      "uc": "12",
+      "area": "general",
+      "prelaciones": [
+        {
+          "tipo": "materia",
+          "valor": "Curso de Trabajo de Grado",
+          "correquisito": false
+        }
+      ]
+    }
+  ]
+];
+
+        const container = document.getElementById('malla');
+        const ucTracker = document.getElementById('ucTracker');
+        const tooltip = document.getElementById('subjectTooltip');
+        
+        // Flatten courses for easy lookup by name
+        const coursesByName = {};
+        let totalUC = 0;
+        
+        // First pass: create DOM and index courses
+        mallaData.forEach((semester, sIndex) => {
+            const semCol = document.createElement('div');
+            semCol.className = 'semester-col';
+            
+            const header = document.createElement('div');
+            header.className = 'semester-header';
+            
+            let semUC = semester.reduce((sum, course) => {
+                const uc = parseInt(course.uc) || 0;
+                return sum + uc;
+            }, 0);
+            
+            header.innerHTML = `Semestre ${sIndex + 1}<br><span style="font-size:0.8rem; font-weight:normal; color:#94a3b8">${semUC} UC</span>`;
+            semCol.appendChild(header);
+            
+            semester.forEach(course => {
+                coursesByName[course.nombre] = course;
+                course.postreqs = []; // To populate later
+                course.elementId = `course-${course.codigo.replace(/\s+/g, '-')}`;
+                course.semesterIndex = sIndex + 1;
+                
+                const card = document.createElement('div');
+                card.className = `subject-card area-${course.area}`;
+                card.id = course.elementId;
+                
+                let reqText = '';
+                if(course.prelaciones && course.prelaciones.length > 0) {
+                    const reqTypes = course.prelaciones.map(p => p.tipo === 'UC' ? `${p.valor} UC` : 'Mat').join(', ');
+                    reqText = `<span class="req-indicator">Pre: ${reqTypes}</span>`;
+                }
+                
+                card.innerHTML = `
+                    <div class="subject-code">${course.codigo}</div>
+                    <div class="subject-name">${course.nombre}</div>
+                    <div class="subject-footer">
+                        <span class="subject-uc">${course.uc} UC</span>
+                        ${reqText}
+                    </div>
+                `;
+                
+                card.addEventListener('mouseenter', (e) => handleHover(course, true, e));
+                card.addEventListener('mouseleave', () => handleHover(course, false));
+                card.addEventListener('mousemove', updateTooltipPosition);
+                
+                semCol.appendChild(card);
+            });
+            
+            container.appendChild(semCol);
+        });
+        
+        // Second pass: compute post-requisites
+        mallaData.forEach(semester => {
+            semester.forEach(course => {
+                if (course.prelaciones) {
+                    course.prelaciones.forEach(pre => {
+                        if (pre.tipo === 'materia') {
+                            const preCourse = coursesByName[pre.valor];
+                            if (preCourse) {
+                                preCourse.postreqs.push(course.nombre);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        
+        function updateTooltipPosition(e) {
+            if(tooltip.style.display === 'block') {
+                const x = e.pageX + 15;
+                const y = e.pageY + 15;
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+            }
+        }
+
+        function handleHover(course, isEntering, e) {
+            if (isEntering) {
+                document.body.classList.add('interacting');
+                
+                // Highlight active
+                const activeEl = document.getElementById(course.elementId);
+                if(activeEl) activeEl.classList.add('is-active');
+                
+                // Highlight prerequisites
+                let ucReqStr = "";
+                if (course.prelaciones) {
+                    course.prelaciones.forEach(pre => {
+                        if (pre.tipo === 'materia') {
+                            const preCourse = coursesByName[pre.valor];
+                            if (preCourse) {
+                                const el = document.getElementById(preCourse.elementId);
+                                if(el) el.classList.add('is-pre');
+                            }
+                        } else if (pre.tipo === 'UC') {
+                            ucReqStr = `Requiere tener aprobadas <strong>${pre.valor} UC</strong> en total.`;
+                        }
+                    });
+                }
+                
+                // Highlight post-requisites
+                if (course.postreqs) {
+                    course.postreqs.forEach(postName => {
+                        const postCourse = coursesByName[postName];
+                        if (postCourse) {
+                            const el = document.getElementById(postCourse.elementId);
+                            if(el) el.classList.add('is-post');
+                        }
+                    });
+                }
+                
+                // Update tracker
+                if(ucReqStr) {
+                    ucTracker.style.display = 'block';
+                    document.getElementById('ucTitle').innerText = course.nombre;
+                    document.getElementById('ucReqs').innerHTML = ucReqStr;
+                } else {
+                    ucTracker.style.display = 'none';
+                }
+                
+                // Show and populate tooltip
+                let preNames = [];
+                if(course.prelaciones) {
+                    course.prelaciones.forEach(pre => {
+                        if (pre.tipo === 'materia') preNames.push(pre.valor);
+                    });
+                }
+                
+                let tooltipHtml = `<div class="tooltip-title">${course.nombre}</div>`;
+                tooltipHtml += `<div class="tooltip-row"><span class="tooltip-label">Código:</span> ${course.codigo}</div>`;
+                tooltipHtml += `<div class="tooltip-row"><span class="tooltip-label">Semestre:</span> ${course.semesterIndex}</div>`;
+                tooltipHtml += `<div class="tooltip-row"><span class="tooltip-label">UC:</span> ${course.uc}</div>`;
+                
+                if (preNames.length > 0) {
+                    tooltipHtml += `<div class="tooltip-row"><span class="tooltip-label">Prelaciones:</span> ${preNames.join(', ')}</div>`;
+                }
+                if (ucReqStr) {
+                    tooltipHtml += `<div class="tooltip-row"><span class="tooltip-label">Pre UC:</span> ${course.prelaciones.find(p=>p.tipo==='UC').valor} UC</div>`;
+                }
+                
+                tooltip.innerHTML = tooltipHtml;
+                tooltip.style.display = 'block';
+                if(e) updateTooltipPosition(e);
+                
+            } else {
+                document.body.classList.remove('interacting');
+                
+                // Remove all highlight classes
+                document.querySelectorAll('.subject-card').forEach(el => {
+                    el.classList.remove('is-active', 'is-pre', 'is-post');
+                });
+                
+                ucTracker.style.display = 'none';
+                tooltip.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
