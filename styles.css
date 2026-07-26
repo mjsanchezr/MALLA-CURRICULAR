@@ -9,24 +9,24 @@
     --highlight-post: #3b82f6; /* Blue for post-requisites */
     --highlight-active: #10b981; /* Green for hovered subject */
     
-    /* Area colors */
-    --color-programacion: rgba(16, 185, 129, 0.2);
-    --border-programacion: rgba(16, 185, 129, 0.5);
+    /* Area colors (Sutiles) */
+    --color-programacion: rgba(16, 185, 129, 0.05);
+    --border-programacion: rgba(16, 185, 129, 0.2);
     
-    --color-matematicas: rgba(59, 130, 246, 0.2);
-    --border-matematicas: rgba(59, 130, 246, 0.5);
+    --color-matematicas: rgba(59, 130, 246, 0.05);
+    --border-matematicas: rgba(59, 130, 246, 0.2);
     
-    --color-ciencias: rgba(139, 92, 246, 0.2);
-    --border-ciencias: rgba(139, 92, 246, 0.5);
+    --color-ciencias: rgba(139, 92, 246, 0.05);
+    --border-ciencias: rgba(139, 92, 246, 0.2);
     
-    --color-gestion: rgba(245, 158, 11, 0.2);
-    --border-gestion: rgba(245, 158, 11, 0.5);
+    --color-gestion: rgba(245, 158, 11, 0.05);
+    --border-gestion: rgba(245, 158, 11, 0.2);
     
-    --color-general: rgba(236, 72, 153, 0.2);
-    --border-general: rgba(236, 72, 153, 0.5);
+    --color-general: rgba(236, 72, 153, 0.05);
+    --border-general: rgba(236, 72, 153, 0.2);
     
-    --color-electiva: rgba(100, 116, 139, 0.2);
-    --border-electiva: rgba(100, 116, 139, 0.5);
+    --color-electiva: rgba(100, 116, 139, 0.05);
+    --border-electiva: rgba(100, 116, 139, 0.2);
 }
 
 body {
@@ -208,10 +208,10 @@ h2 {
     z-index: 10;
 }
 
-/* Passed state */
+/* Passed state (Verde Vivo) */
 .subject-card.is-passed {
     border-color: #10b981;
-    background: rgba(16, 185, 129, 0.1) !important;
+    background: rgba(16, 185, 129, 0.15) !important;
 }
 .subject-card.is-passed::after {
     content: "✓";
@@ -222,8 +222,20 @@ h2 {
     font-weight: bold;
     font-size: 1.2rem;
 }
-.subject-card.is-passed .subject-name {
-    color: #10b981;
+
+/* Cursando state (Azul Vivo) */
+.subject-card.is-cursando {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.15) !important;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+.subject-card.is-cursando::after {
+    content: "▶";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #3b82f6;
+    font-size: 0.9rem;
 }
 
 /* Interaction States (when hovered over another card) */

@@ -108,7 +108,7 @@ window.mallaData = [
     },
     {
       "codigo": "FING 02003",
-      "nombre": "Calculo Diferencial",
+      "nombre": "Cálculo Diferencial",
       "uc": "6",
       "area": "matematicas",
       "prelaciones": [
@@ -653,7 +653,7 @@ window.mallaData = [
         },
         {
           "tipo": "materia",
-          "valor": "Probabilidad y Estadísticas",
+          "valor": "Probabilidad y Estadística",
           "correquisito": false
         }
       ]

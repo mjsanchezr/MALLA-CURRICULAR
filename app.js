@@ -1,6 +1,6 @@
 // Estado global
 const coursesByName = {};
-const passedCourses = JSON.parse(localStorage.getItem('malla_passed_courses') || '[]');
+const courseStates = JSON.parse(localStorage.getItem('malla_course_states') || '{}');
 let showFlow = false;
 let totalCarreraUC = 0;
 
@@ -58,9 +58,13 @@ function renderMalla() {
             
             const card = document.createElement('div');
             card.className = `subject-card area-${course.area}`;
-            if (passedCourses.includes(course.nombre)) {
+            
+            if (courseStates[course.nombre] === 'aprobada') {
                 card.classList.add('is-passed');
+            } else if (courseStates[course.nombre] === 'cursando') {
+                card.classList.add('is-cursando');
             }
+            
             card.id = course.elementId;
             
             let reqText = '';
@@ -111,31 +115,43 @@ function computePostReqs() {
 }
 
 function togglePassedStatus(nombre, cardElement) {
-    const idx = passedCourses.indexOf(nombre);
-    if (idx === -1) {
-        passedCourses.push(nombre);
+    const currentState = courseStates[nombre] || 'none';
+    
+    // Ciclo: none -> cursando -> aprobada -> none
+    if (currentState === 'none') {
+        courseStates[nombre] = 'cursando';
+        cardElement.classList.add('is-cursando');
+        cardElement.classList.remove('is-passed');
+    } else if (currentState === 'cursando') {
+        courseStates[nombre] = 'aprobada';
+        cardElement.classList.remove('is-cursando');
         cardElement.classList.add('is-passed');
     } else {
-        passedCourses.splice(idx, 1);
-        cardElement.classList.remove('is-passed');
+        delete courseStates[nombre];
+        cardElement.classList.remove('is-cursando', 'is-passed');
     }
     
-    // Guardar en localStorage
-    localStorage.setItem('malla_passed_courses', JSON.stringify(passedCourses));
+    localStorage.setItem('malla_course_states', JSON.stringify(courseStates));
     updateGlobalStats();
 }
 
 function updateGlobalStats() {
-    let currentUC = 0;
-    passedCourses.forEach(nombre => {
+    let cursandoUC = 0;
+    let aprobadaUC = 0;
+    
+    Object.keys(courseStates).forEach(nombre => {
         const course = coursesByName[nombre];
         if(course) {
-            currentUC += parseInt(course.uc) || 0;
+            if(courseStates[nombre] === 'cursando') {
+                cursandoUC += parseInt(course.uc) || 0;
+            } else if (courseStates[nombre] === 'aprobada') {
+                aprobadaUC += parseInt(course.uc) || 0;
+            }
         }
     });
     
-    let percent = ((currentUC / totalCarreraUC) * 100).toFixed(1);
-    globalUCElement.innerHTML = `${currentUC} / ${totalCarreraUC} UC Aprobadas (${percent}%)`;
+    let percent = ((aprobadaUC / totalCarreraUC) * 100).toFixed(1);
+    globalUCElement.innerHTML = `<span style="color:#10b981">${aprobadaUC} UC Aprobadas (${percent}%)</span> | <span style="color:#3b82f6">${cursandoUC} UC Cursando</span>`;
 }
 
 function updateTooltipPosition(e) {
@@ -272,33 +288,32 @@ function drawCurve(el1, el2, isCoreq) {
     const rect1 = el1.getBoundingClientRect();
     const rect2 = el2.getBoundingClientRect();
     
-    // Asumimos layout de izquierda a derecha. 
     // Punto inicio: Centro derecha de pre-requisito
-    // Punto fin: Centro izquierda de la materia actual
     const startX = rect1.right + window.scrollX;
     const startY = rect1.top + (rect1.height / 2) + window.scrollY;
     
-    const endX = rect2.left + window.scrollX;
+    // Punto fin: Centro izquierda de la materia actual
+    const endX = rect2.left + window.scrollX - 5; // offset para la cabeza de la flecha
     const endY = rect2.top + (rect2.height / 2) + window.scrollY;
     
-    const distanceX = endX - startX;
-    // Puntos de control para la curva Bezier
-    const cp1X = startX + (distanceX * 0.5);
-    const cp1Y = startY;
-    const cp2X = endX - (distanceX * 0.5);
-    const cp2Y = endY;
+    // Enrutamiento Ortogonal (estilo Manhattan)
+    // Calculamos el punto medio en X para bajar/subir
+    const midX = startX + (endX - startX) / 2;
     
-    const color = isCoreq ? 'rgba(249, 115, 22, 0.5)' : 'rgba(239, 68, 68, 0.4)';
+    const color = isCoreq ? 'rgba(249, 115, 22, 0.7)' : 'rgba(239, 68, 68, 0.7)';
     const strokeWidth = 2;
     
-    // Crear el Path
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${endX} ${endY}`);
+    
+    // Tres segmentos rectos: M(inicio) L(centro-x, inicio-y) L(centro-x, fin-y) L(fin-x, fin-y)
+    const d = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
+    
+    path.setAttribute("d", d);
     path.setAttribute("fill", "transparent");
     path.setAttribute("stroke", color);
     path.setAttribute("stroke-width", strokeWidth);
+    path.setAttribute("stroke-linejoin", "round");
     
-    // Crear la punta de la flecha
     const markerId = isCoreq ? 'arrow-coreq' : 'arrow-pre';
     path.setAttribute("marker-end", `url(#${markerId})`);
     
