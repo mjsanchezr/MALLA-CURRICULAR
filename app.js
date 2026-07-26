@@ -11,8 +11,6 @@ const slugify = (text) => text.toLowerCase().replace(/[\s\W-]+/g, '-');
 const container = document.getElementById('malla');
 const ucTracker = document.getElementById('ucTracker');
 const tooltip = document.getElementById('subjectTooltip');
-const svgCanvas = document.getElementById('svgCanvas');
-const btnToggleFlow = document.getElementById('btnToggleFlow');
 const globalUCElement = document.getElementById('globalUC');
 
 function init() {
@@ -280,3 +278,4 @@ function handleHover(course, isEntering, e) {
         tooltip.style.display = 'none';
     }
 }
+init();
