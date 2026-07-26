@@ -141,7 +141,10 @@ h2 {
     gap: 20px;
     min-width: 1400px;
     position: relative;
+    z-index: 2;
+}
 
+.semester-col {
     display: flex;
     flex-direction: column;
     gap: 15px;

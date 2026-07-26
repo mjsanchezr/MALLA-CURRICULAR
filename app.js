@@ -40,6 +40,8 @@ function checkPrerequisites(course) {
 
     for (let pre of course.prelaciones) {
         if (pre.tipo === 'materia') {
+            if (pre.valor === 'Ingreso') continue;
+            
             const preState = courseStates[pre.valor] || 'none';
             if (pre.correquisito) {
                 if (preState !== 'aprobada' && preState !== 'cursando') {
