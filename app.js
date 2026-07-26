@@ -66,13 +66,14 @@ function updateCardVisuals(course, cardElement) {
     cardElement.classList.remove('is-passed', 'is-cursando', 'is-invalid');
     
     const state = courseStates[course.nombre];
-    if (state === 'aprobada' || state === 'cursando') {
+    if (state === 'aprobada') {
+        cardElement.classList.add('is-passed');
+    } else if (state === 'cursando') {
         const hasReqs = checkPrerequisites(course);
         if (!hasReqs) {
             cardElement.classList.add('is-invalid');
         } else {
-            if (state === 'aprobada') cardElement.classList.add('is-passed');
-            if (state === 'cursando') cardElement.classList.add('is-cursando');
+            cardElement.classList.add('is-cursando');
         }
     }
 }
