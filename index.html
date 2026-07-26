@@ -18,9 +18,6 @@
             <h3 id="globalUC">0 UC Aprobadas | 0 UC Cursando</h3>
             <p>Haz clic en las materias para cambiar su estado (Cursando / Aprobada).</p>
         </div>
-        <div>
-            <button id="btnToggleFlow" class="btn-toggle">Mostrar Flujo de Prelaciones</button>
-        </div>
     </div>
 
     <div class="legend">
@@ -31,16 +28,12 @@
         <div class="legend-item"><div class="legend-color" style="background: var(--border-general);"></div> Formación General</div>
         <div class="legend-item"><div class="legend-color" style="background: var(--border-electiva);"></div> Electivas</div>
         
-        <div class="legend-item" style="margin-left: 20px; border-color: #94a3b8;"><div class="legend-color" style="background: #94a3b8;"></div> Prelación</div>
-        <div class="legend-item" style="border-color: #22c55e;"><div class="legend-color" style="background: #22c55e;"></div> Correquisito</div>
-        <div class="legend-item" style="border-color: #94a3b8;"><div class="legend-color" style="background: transparent; border-bottom: 2px solid #94a3b8; border-radius:0; width: 15px; height: 0;"></div> UC Requeridas</div>
+        <div class="legend-item" style="margin-left: 20px; border-color: #10b981;"><div class="legend-color" style="background: #10b981;"></div> Aprobada</div>
+        <div class="legend-item" style="border-color: #3b82f6;"><div class="legend-color" style="background: #3b82f6;"></div> Cursando</div>
+        <div class="legend-item" style="border-color: #ef4444;"><div class="legend-color" style="background: #ef4444;"></div> Error (Faltan Prerrequisitos)</div>
     </div>
 
-    <!-- Contenedor general que permite scroll horizontal si es necesario -->
     <div class="scroll-container">
-        <!-- SVG Canvas para dibujar las flechas -->
-        <svg id="svgCanvas"></svg>
-        
         <div class="malla-container" id="malla">
             <!-- Renderizado dinámicamente por JS -->
         </div>
