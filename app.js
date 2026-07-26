@@ -274,8 +274,13 @@ function drawAllArrows() {
                             const preEl = document.getElementById(preCourse.elementId);
                             const thisEl = document.getElementById(course.elementId);
                             if(preEl && thisEl) {
-                                drawCurve(preEl, thisEl, pre.correquisito);
+                                drawCurve(preEl, thisEl, pre.correquisito, preCourse, course);
                             }
+                        }
+                    } else if (pre.tipo === 'UC') {
+                        const thisEl = document.getElementById(course.elementId);
+                        if(thisEl) {
+                            drawUcArrow(thisEl, pre.valor);
                         }
                     }
                 });
@@ -284,38 +289,79 @@ function drawAllArrows() {
     });
 }
 
-function drawCurve(el1, el2, isCoreq) {
+function drawUcArrow(el, ucValor) {
+    const rect = el.getBoundingClientRect();
+    const endX = rect.left + window.scrollX - 5;
+    const endY = rect.top + (rect.height / 2) + window.scrollY;
+    const startX = endX - 50;
+    
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", `M ${startX} ${endY} L ${endX} ${endY}`);
+    path.setAttribute("stroke", "#94a3b8");
+    path.setAttribute("stroke-width", "2");
+    path.setAttribute("marker-end", "url(#arrow-pre)");
+    
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("x", startX + 25);
+    text.setAttribute("y", endY - 5);
+    text.setAttribute("fill", "#cbd5e1");
+    text.setAttribute("font-size", "10px");
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = `${ucValor} UC`;
+    
+    svgCanvas.appendChild(path);
+    svgCanvas.appendChild(text);
+}
+
+function drawCurve(el1, el2, isCoreq, course1, course2) {
     const rect1 = el1.getBoundingClientRect();
     const rect2 = el2.getBoundingClientRect();
     
-    // Punto inicio: Centro derecha de pre-requisito
     const startX = rect1.right + window.scrollX;
     const startY = rect1.top + (rect1.height / 2) + window.scrollY;
     
-    // Punto fin: Centro izquierda de la materia actual
-    const endX = rect2.left + window.scrollX - 5; // offset para la cabeza de la flecha
+    const endX = rect2.left + window.scrollX - 5; 
     const endY = rect2.top + (rect2.height / 2) + window.scrollY;
     
-    // Enrutamiento Ortogonal (estilo Manhattan)
-    // Calculamos el punto medio en X para bajar/subir
-    const midX = startX + (endX - startX) / 2;
-    
-    const color = isCoreq ? 'rgba(249, 115, 22, 0.7)' : 'rgba(239, 68, 68, 0.7)';
-    const strokeWidth = 2;
+    // Colores según la leyenda del PDF
+    const color = isCoreq ? '#22c55e' : '#94a3b8'; // Verde para Correq, Gris para Prelación
+    const markerId = isCoreq ? 'arrow-coreq' : 'arrow-pre';
     
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    
-    // Tres segmentos rectos: M(inicio) L(centro-x, inicio-y) L(centro-x, fin-y) L(fin-x, fin-y)
-    const d = `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`;
-    
-    path.setAttribute("d", d);
     path.setAttribute("fill", "transparent");
     path.setAttribute("stroke", color);
-    path.setAttribute("stroke-width", strokeWidth);
+    path.setAttribute("stroke-width", "2");
     path.setAttribute("stroke-linejoin", "round");
-    
-    const markerId = isCoreq ? 'arrow-coreq' : 'arrow-pre';
     path.setAttribute("marker-end", `url(#${markerId})`);
+    
+    // Lógica de Enrutamiento
+    if (course1.semesterIndex === course2.semesterIndex) {
+        // En la misma columna (Correquisitos usualmente)
+        const vStartX = rect1.left + (rect1.width / 2) + window.scrollX;
+        let vStartY, vEndY;
+        if (rect1.top < rect2.top) {
+            vStartY = rect1.bottom + window.scrollY;
+            vEndY = rect2.top + window.scrollY - 5;
+        } else {
+            vStartY = rect1.top + window.scrollY;
+            vEndY = rect2.bottom + window.scrollY + 5;
+        }
+        path.setAttribute("d", `M ${vStartX} ${vStartY} L ${vStartX} ${vEndY}`);
+    } else if (course2.semesterIndex - course1.semesterIndex === 1) {
+        // Columna adyacente: enrutamiento ortogonal simple
+        const midX = startX + (endX - startX) / 2;
+        path.setAttribute("d", `M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`);
+    } else {
+        // Salto de columna: rutear por debajo para no atravesar otras cajas
+        const containerRect = document.getElementById('malla').getBoundingClientRect();
+        // Offset dinámico para evitar solapamientos si múltiples líneas saltan
+        const bottomY = containerRect.bottom + window.scrollY + 20 + (course1.semesterIndex * 5); 
+        
+        const gap1X = startX + 10;
+        const gap2X = endX - 10;
+        
+        path.setAttribute("d", `M ${startX} ${startY} L ${gap1X} ${startY} L ${gap1X} ${bottomY} L ${gap2X} ${bottomY} L ${gap2X} ${endY} L ${endX} ${endY}`);
+    }
     
     svgCanvas.appendChild(path);
 }
@@ -324,7 +370,7 @@ function drawCurve(el1, el2, isCoreq) {
 function initSvgMarkers() {
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     
-    // Marker rojo para Prerrequisitos
+    // Marker gris para Prerrequisitos
     const markerPre = document.createElementNS("http://www.w3.org/2000/svg", "marker");
     markerPre.setAttribute("id", "arrow-pre");
     markerPre.setAttribute("markerWidth", "10");
@@ -336,10 +382,10 @@ function initSvgMarkers() {
     
     const prePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
     prePath.setAttribute("d", "M0,0 L0,6 L9,3 z");
-    prePath.setAttribute("fill", "rgba(239, 68, 68, 0.6)");
+    prePath.setAttribute("fill", "#94a3b8");
     markerPre.appendChild(prePath);
     
-    // Marker naranja para Correquisitos
+    // Marker verde para Correquisitos
     const markerCoreq = document.createElementNS("http://www.w3.org/2000/svg", "marker");
     markerCoreq.setAttribute("id", "arrow-coreq");
     markerCoreq.setAttribute("markerWidth", "10");
@@ -351,7 +397,7 @@ function initSvgMarkers() {
     
     const coreqPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
     coreqPath.setAttribute("d", "M0,0 L0,6 L9,3 z");
-    coreqPath.setAttribute("fill", "rgba(249, 115, 22, 0.6)");
+    coreqPath.setAttribute("fill", "#22c55e");
     markerCoreq.appendChild(coreqPath);
     
     defs.appendChild(markerPre);
